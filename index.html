@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search and EmailJS</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <h1>Search and Choose Number</h1>
+        <a href="history.html" style="color:white; margin-left: 50%;">History</a>
+
+    </nav>
+    <div class="container" id="searchContainer">
+        <input type="text" id="searchBar" placeholder="Search for a number...">
+        <table id="resultsTable">
+            <thead>
+                <tr>
+                    <th>Photo</th>
+                    <th>Number</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody id="results"></tbody>
+        </table>
+    </div>
+    <div class="container" id="detailsContainer" style="display: none;">
+      <div class="kpayname">လွဲရမည့် kpay <h3>နံပတ် = </h3><h3>အမည် = </h3> ငွေအရင်လွှဲ ရပါမည်။</div>
+        <button id="backBtn">Back</button>
+        <img id="selectedPhoto" src="" alt="">
+        <p id="selectedNumber"></p>
+        <p id="selectedAmount"></p>
+        <input type="text" id="inputAmount" placeholder="Enter Kpayname" required>
+        <input type="text" id="inputTime" placeholder="transfer number " required>
+        <input type="text" id="inputDate" placeholder="amount$" required>
+        <input type="text" id="inputEmail" placeholder="email" required>
+
+        
+        
+        <div class="button">
+        <button id="submitBtn">Send </button>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+    emailjs.init('80uAcGkKQNbay0xpB'); // Replace with your EmailJS user ID
+
+    const searchBar = document.getElementById('searchBar');
+    const results = document.getElementById('results');
+    const detailsContainer = document.getElementById('detailsContainer');
+    const searchContainer = document.getElementById('searchContainer');
+    const backBtn = document.getElementById('backBtn');
+    const selectedPhoto = document.getElementById('selectedPhoto');
+    const selectedNumber = document.getElementById('selectedNumber');
+    const selectedAmount = document.getElementById('selectedAmount');
+    const inputAmount = document.getElementById('inputAmount');
+    const inputTime = document.getElementById('inputTime');
+    const inputDate = document.getElementById('inputDate');
+    const inputEmail = document.getElementById('inputEmail');
+    const submitBtn = document.getElementById('submitBtn');
+    const history = document.getElementById('history');
+
+    // Sample data with photos, numbers, and initial amounts
+    const numbers = [
+    { number: '545 / နဂါး', name: 'နဂါး', photo: 'dragon.jpg', name: 'နဂါး', amount: '1000MMK' },
+        { number: '503 / သိုင်းသမား', name: 'သိုင်းသမား', photo: 'thine ta mar.jpg', amount: '10000MMK' },
+        { number: '502 / ဓားဆောင်သူ', name: 'ဓားဆောင်သူ', photo: 'Dar saund thu.jpg', amount: '10000MMK' },
+        { number: '515 / ဥဒေါင်း', name: 'ဥဒေါင်း', photo: 'u daung.jpg', amount: '10000MMK' },
+        { number: '539 / ခြင်္သေ့', name: 'ခြင်္သေ့', photo: 'lion.jpg', amount: '10000MMK' },
+        { number: '541 / သိမ်းငှက်', name: 'သိမ်းငှက်', photo: 'thainbird.jpg', amount: '10000MMK' },
+        { number: '508 / ကျားခေါင်း', name: 'ကျားခေါင်း', photo: 'digerhead.jpg', amount: '10000MMK' },
+        { number: '507 / ဗျိုင်း', name: 'ဗျိုင်း', photo: 'pyain.jpg', amount: '10000MMK' },
+        { number: '537 / လူရည်ချွန်', name: 'လူရည်ချွန်', photo: 'luyaychon.jpg', amount: '10000MMK' },
+        { number: '532 / ဥသြငှက်', name: 'ဥသြငှက်', photo: 'oakallnyat.jpg', amount: '10000MMK' },
+        { number: '527 / ဖိုးမုတ်ဆိတ်', name: 'ဖိုးမုတ်ဆိတ်', photo: 'phoemotesite.jpg', amount: '10000MMK' },
+        { number: '519 / စာရင်းကိုင်', name: 'စာရင်းကိုင်', photo: 'saryinkyain.jpg', amount: '10000MMK' },
+        { number: '529 / ဆတ်', name: 'ဆတ်', photo: 'sat.jpg', amount: '10000MMK' },
+        { number: '546 / ငုံး', name: 'ငုံး', photo: 'nyone.jpg', amount: '10000MMK' },
+        { number: '504 / မြင်း', name: 'မြင်း', photo: 'myinn.jpg', amount: '10000MMK' },
+        { number: '524 / လွေးငှက်', name: 'လွေးငှက်', photo: 'lawybird.jpg', amount: '10000MMK' },
+        { number: '538 / နွား', name: 'နွား', photo: 'cow.jpg', amount: '10000MMK' },
+        { number: '528 / လားလူမျိုး', name: 'လားလူမျိုး', photo: 'larhulumyo.jpg', amount: '10000MMK' },
+        { number: '512 / ဓားကိုင်သူ', name: 'ဓားကိုင်သူ', photo: 'tharkointhu.jpg', amount: '10000MMK' },
+        { number: '522 / ကျီး', name: 'ကျီး', photo: 'gyee.jpg', amount: '10000MMK' },
+        { number: '543 / ရွာဆော်', name: 'ရွာဆော်', photo: 'ywarsaw.jpg', amount: '10000MMK' },
+        { number: '520 / ဂျိူးငှက်', name: 'ဂျိူးငှက်', photo: 'joe.jpg', amount: '10000MMK' },
+        { number: '534 / ၀က် ', name: '၀က်', photo: 'watt.jpg', amount: '10000MMK' },
+        { number: '516 / အောက်ချင်းငှက်', name: 'အောက်ချင်းငှက်', photo: 'outchinbird.jpg', amount: '10000MMK' },
+        { number: '535 / တားမြစ်သူ', name: 'တားမြစ်သူ', photo: 'tarmyitthu.jpg', amount: '10000MMK' },
+        { number: '540 / ဘီလုံးငှက်ငယ်', name: 'ဘီလုံးငှက်ငယ်', photo: 'beelonebirdnge.jpg', amount: '10000MMK' },
+        { number: '511 / ကြိုဆိုသူ', name: 'ကြိုဆိုသူ', photo: 'kyosoethu.jpg', amount: '10000MMK' },
+        { number: '518 / ယင်းနက်လူမျိုး', name: 'ယင်းနက်လူမျိုး', photo: 'yinnatlumyo.jpg', amount: '10000MMK' },
+        { number: '513 / ၀ံပုလွေ', name: '၀ံပုလွေ', photo: 'wonpalway.jpg', amount: '10000MMK' },
+        { number: '549 / မုဆိူး', name: 'မုဆိူး', photo: 'motesoe.jpg', amount: '10000MMK' },
+        { number: '544 / လေးသမား', name: 'လေးသမား', photo: 'laytamar.jpg', amount: '10000MMK' },
+        { number: '510 / နာဂလူမျိုး', name: 'နာဂလူမျိုး', photo: 'nargalumyo.jpg', amount: '10000MMK' },
+        { number: '536 / ရခိုင်လူမျိုး', name: 'ရခိုင်လူမျိုး', photo: 'yakhainlumyo.jpg', amount: '10000MMK' },
+        { number: '523 / ဖား', name: 'ဖား', photo: 'par.jpg', amount: '10000MMK' },
+        { number: '525 / မင်းသား', name: 'မင်းသား', photo: 'mintar.jpg', amount: '10000MMK' },
+        { number: '533 / အလှမယ်', name: 'အလှမယ်', photo: 'alamal.jpg', amount: '10000MMK' },
+        { number: '509 / ငါးမန်း', name: 'ငါးမန်း', photo: 'fishman.jpg', amount: '10000MMK' },
+        { number: '517 / ပင့်ကူ', name: 'ပင့်ကူ', photo: 'pinku.jpg', amount: '10000MMK' },
+        { number: '505 / သိုင်းသမား', name: 'သိုင်းသမား', photo: 'thintamar,jpg', amount: '10000MMK' },
+        { number: '526 / လူငယ်', name: 'လူငယ်', photo: 'lunge.jpg', amount: '10000MMK' },
+        { number: '506 / အဲန်းလူမျိုး', name: 'အဲန်းလူမျိုး', photo: 'annlumyo.jpg', amount: '10000MMK' },
+        { number: '547 / နှံကောင်', name: 'နှံကောင်', photo: 'nankaung.jpg', amount: '10000MMK' },
+        { number: '521 / တုတ်သိုင်းသမား', name: 'တုတ်သိုင်းသမား', photo: 'tokethaintamar.jpg', amount: '10000MMK' },
+        { number: '531 / ဖျံ', name: 'ဖျံ', photo: 'pyan.jpg', amount: '10000MMK' },
+        { number: '501 / ပင်လယ်ပုဇွန်', name: 'ပင်လယ်ပုဇွန်', photo: 'pinlalpasone.jpg', amount: '10000MMK' },
+        { number: '514 / မီးပုံးကိုင်', name: 'မီးပုံးပျံ', photo: 'meeponekhain.jpg', amount: '10000MMK' },
+        { number: '542 / မိန်းမ', name: 'မိန်းမ', photo: 'mainma.jpg', amount: '10000MMK' },
+        { number: '550 / ပျားပျံ ', name: 'ပျားပျံ', photo: 'pyarpyan.jpg', amount: '10000MMK' },
+        { number: '530 / ပုစဥ်းရင်ကွဲ', name: 'ပုစဥ်းရင်ကွဲ', photo: 'pasinyinkwal.jpg', amount: '10000MMK' },
+        { number: '548 / ဟင်္သာ', name: '', photo: 'hintar.jpg', amount: '10000MMK' },
+        { number: '595 / ပုတီးဆိပ်', name: '', photo: 'pateesite.jpg', amount: '10000MMK' },
+        { number: '553 / ဥဒေါင်း', name: '', photo: 'udaung.jpg', amount: '10000MMK' },
+        { number: '552 / တိုးနယား', name: '', photo: 'toenayar.jpg', amount: '10000MMK' },
+        { number: '565 / ပညာတော်သင်', name: '', photo: 'pyinnyartawtin.jpg', amount: '10000MMK' },
+        { number: '589 / ကိန်နရီ', name: '', photo: 'kainnayee.jpg', amount: '10000MMK' },
+        { number: '591 / ဂဠန်မင်း', name: '', photo: 'ganonemin.jpg', amount: '10000MMK' },
+        { number: '558 / သိုင်းဆရာ', name: '', photo: 'thainsayar.jpg', amount: '10000MMK' },
+        { number: '557 / လူအို', name: '', photo: 'luo.jpg', amount: '10000MMK' },
+        { number: '587 / ကျားသစ်', name: '', photo: 'gyarthit.jpg', amount: '10000MMK' },
+        { number: '582 / န', name: '', photo: 'na.jpg', amount: '10000MMK' },
+        { number: '577 / ဆင် ', name: '', photo: 'sin.jpg', amount: '10000MMK' },
+        { number: '569 / ရေဘဲ', name: '', photo: 'yaybae.jpg', amount: '10000MMK' },
+        { number: '579 / ပြဒါးတိုင်', name: '', photo: 'pyatarthain.jpg', amount: '10000MMK' },
+        { number: '596 / ရသေ့', name: '', photo: 'yatae.jpg', amount: '10000MMK' },
+        { number: '554 / သစ်ရွက်ကိုင်', name: '', photo: 'thityatkhain.jpg', amount: '10000MMK' },
+        { number: '574 / ထီးကိုင်', name: '', photo: 'hteekhain.jpg', amount: '10000MMK' },
+        { number: '588 / ထောက်ကွန်ပါ', name: '', photo: 'toutkonpar.jpg', amount: '10000MMK' },
+        { number: '578 / ဘဲ', name: '', photo: 'bae.jpg', amount: '10000MMK' },
+        { number: '562 / သမင်နက်', name: '', photo: 'thaminnat.jpg', amount: '10000MMK' },
+        { number: '572 / သိမ်', name: '', photo: 'thain.jpg', amount: '10000MMK' },
+        { number: '593 / အလေးပြု', name: '', photo: 'alaypyat.jpg', amount: '10000MMK' },
+        { number: '570 / အောက်မီးလင်း', name: '', photo: 'outmeelin.jpg', amount: '10000MMK' },
+        { number: '584 / ဒေါင်းတောင်ကိုင်', name: '', photo: 'daungtaungkhain.jpg', amount: '10000MMK' },
+        { number: '566 / မြင်းကျား', name: '', photo: 'myingarr.jpg', amount: '10000MMK' },
+        { number: '585 / ခွေးဖြူ', name: '', photo: 'kwayphyu.jpg', amount: '10000MMK' },
+        { number: '590 / ဓားပြဗိုလ်', name: '', photo: 'darmyapoe.jpg', amount: '10000MMK' },
+        { number: '561 / ကြောင်', name: '', photo: 'kyaung.jpg', amount: '10000MMK' },
+        { number: '568 / လင်းဆွဲ', name: '', photo: 'linsway.jpg', amount: '10000MMK' },
+        { number: '563 / ပန်းကိုင်', name: '', photo: 'pankhain.jpg', amount: '10000MMK' },
+        { number: '599 / ကြက်ဖ', name: '', photo: 'kyatpha.jpg', amount: '10000MMK' },
+        { number: '594 / မြေခွေး', name: '', photo: 'myaykway.jpg', amount: '10000MMK' },
+        { number: '560 / စာကလေး', name: '', photo: 'sarkalay.jpg', amount: '10000MMK' },
+        { number: '586 / ယုန်', name: '', photo: 'yone.jpg', amount: '10000MMK' },
+        { number: '573 / ရပ်တန့်ခိုင်း', name: '', photo: 'yatthankhain.jpg', amount: '10000MMK' },
+        { number: '575 / ကြွက်', name: '', photo: 'mount.jpg', amount: '10000MMK' },
+        { number: '583 / ကင်းခြေအျား', name: '', photo: 'kinchaymyar.jpg', amount: '10000MMK' },
+        { number: '559 / လက်ဆတ်သူ', name: '', photo: 'latsatthu.jpg', amount: '10000MMK' },
+        { number: '567 / လက်ပိုက်သူ', name: '', photo: 'latpaitthu.jpg', amount: '10000MMK' },
+        { number: '555 / မီချောင်း', name: '', photo: 'mecaunt.jpg', amount: '10000MMK' },
+        { number: '576 / ပုစဥ်း', name: '', photo: 'pasin.jpg', amount: '10000MMK' },
+        { number: '556 / ဧရာမငါးကြီး', name: '', photo: 'ayermanargyi.jpg', amount: '10000MMK' },
+        { number: '597 / မြို့စား(မြို့အုပ်)', name: '', photo: 'myoesar.jpg', amount: '10000MMK' },
+        { number: '571 / သာမိုမီတာ', name: '', photo: 'tarmometar.jpg', amount: '10000MMK' },
+        { number: '581 / နယ်စား', name: '', photo: 'nalsar.jpg', amount: '10000MMK' },
+        { number: '551 / ပေရွက်ထမ်း', name: '', photo: 'payyawtthan.jpg', amount: '10000MMK' },
+        { number: '564 / ဂဏန်း', name: '', photo: 'kanan.jpg', amount: '10000MMK' },
+        { number: '592 / လိပ်ပြာ', name: '', photo: 'latepyar.jpg', amount: '10000MMK' },
+        { number: '600 / ခမောက်ဆောင်း', name: '', photo: 'kamountsoung.jpg', amount: '10000MMK' },
+        { number: '580 / လေထိုးတံ', name: '', photo: 'laytoethan.jpg', amount: '10000MMK' },
+        { number: '598 / ကြေငြာသူ ', name: '', photo: 'kyawnyarthu.jpg', amount: '10000MMK' },
+        { number: '645 / ကောင်းကင်', name: '', photo: 'kaungkin.jpg', amount: '10000MMK' },
+        { number: '603 / ကမ္ဘာ', name: '', photo: 'kabar.jpg', amount: '10000MMK' },
+        { number: '602 / နေ', name: '', photo: 'nay.jpg', amount: '10000MMK' },
+        { number: '639 / လ', name: '', photo: 'la.jpg', amount: '10000MMK' },
+        { number: '637 / မိုးကြိုး', name: '', photo: 'moekyo.jpg', amount: '10000MMK' },
+        { number: '641 / မိုးရွာ', name: '', photo: 'moeywar.jpg', amount: '10000MMK' },
+        { number: '608 / လေ', name: '', photo: 'lay.jpg', amount: '10000MMK' },
+        { number: '607 / တိမ်', name: '', photo: 'tain.jpg', amount: '10000MMK' },
+        { number: '615 / ရေခဲ', name: '', photo: 'ice.jpg', amount: '10000MMK' },
+        { number: '632 / နှင်း', name: '', photo: 'nin.jpg', amount: '10000MMK' },
+        { number: '627 / ကြယ်', name: '', photo: 'kyawl.jpg', amount: '10000MMK' },
+        { number: '619 / လျှပ်စီးလျှက်', name: '', photo: 'lyatseelat.jpg', amount: '10000MMK' },
+        { number: '629 / ရေအိုင်', name: '', photo: 'yayi.jpg', amount: '10000MMK' },
+        { number: '646 / တောင်', name: '', photo: 'taung.jpg', amount: '10000MMK' },
+        { number: '604 / ‌ရေချောင်း', name: '', photo: 'yaycaung.jpg', amount: '10000MMK' },
+        { number: '624 / ကျောက်တုံး', name: '', photo: 'kyaunttone.jpg', amount: '10000MMK' },
+        { number: '638 / လမ်းမ', name: '', photo: 'lamma.jpg', amount: '10000MMK' },
+        { number: '628 / ရေတွင်း', name: '', photo: 'yaytwin.jpg', amount: '10000MMK' },
+        { number: '612 / မြို့', name: '', photo: 'myoe.jpg', amount: '10000MMK' },
+        { number: '622 / အုတ်တံတိုင်း', name: '', photo: 'oaktantine.jpg', amount: '10000MMK' },
+        { number: '643 / ဂူ', name: '', photo: 'gu.jpg', amount: '10000MMK' },
+        { number: '620 / ဆိပ်ကမ်း', name: '', photo: 'sitecame.jpg', amount: '10000MMK' },
+        { number: '634 / လယ်', name: '', photo: 'lal.jpg', amount: '10000MMK' },
+        { number: '616 / သင်္ချိုင်း', name: '', photo: 'tinchain.jpg', amount: '10000MMK' },
+        { number: '635 / ပန်းခြံ', name: '', photo: 'panchan.jpg', amount: '10000MMK' },
+        { number: '640 / တောအုပ်', name: '', photo: 'tawoake.jpg', amount: '10000MMK' },
+        { number: '611 / ဟော်တယ်', name: '', photo: 'hotle.jpg', amount: '10000MMK' },
+        { number: '618 / နန်းတော်', name: '', photo: 'nantaw.jpg', amount: '10000MMK' },
+        { number: '613 / အိမ်', name: '', photo: 'home.jpg', amount: '10000MMK' },
+        { number: '649 / နတ်စင်', name: '', photo: 'natsin.jpg', amount: '10000MMK' },
+        { number: '644 / ပြသာဒ်', name: '', photo: 'pyathat.jpg', amount: '10000MMK' },
+        { number: '610 / ကျောင်း', name: '', photo: 'school.jpg', amount: '10000MMK' },
+        { number: '636 / တံတား', name: '', photo: 'tathar.jpg', amount: '10000MMK' },
+        { number: '623 / ဇရပ်', name: '', photo: 'sayat.jpg', amount: '10000MMK' },
+        { number: '625 / စေတီ', name: '', photo: 'sayte.jpg', amount: '10000MMK' },
+        { number: '633 / အပေါင်ဆိုင် ', name: '', photo: 'apaungsain.jpg', amount: '10000MMK' },
+        { number: '609 / ပုလဲ', name: '', photo: 'palae.jpg', amount: '10000MMK' },
+        { number: '617 / ရွှေချောင်း', name: '', photo: 'shwechaung.jpg', amount: '10000MMK' },
+        { number: '605 / ငွေခဲ', name: '', photo: 'silverkae.jpg', amount: '10000MMK' },
+        { number: '626 / ကပ္ပလီ', name: '', photo: 'katpali.jpg', amount: '10000MMK' },
+        { number: '606 / လေးဂွ', name: '', photo: 'laykya.jpg', amount: '10000MMK' },
+        { number: '647 / တောင်ဝှေး', name: '', photo: 'taungway.jpg', amount: '10000MMK' },
+        { number: '621 / ဂျင်း', name: '', photo: 'gin.jpg', amount: '10000MMK' },
+        { number: '631 / မှင်ခဲ', name: '', photo: 'minkae.jpg', amount: '10000MMK' },
+        { number: '601 / စုတ်တံ', name: '', photo: 'sotetan.jpg', amount: '10000MMK' },
+        { number: '614 / မှင်ခွက်', name: '', photo: 'minkwat.jpg', amount: '10000MMK' },
+        { number: '642 / စက္ကူထုပ်', name: '', photo: 'satkutoke.jpg', amount: '10000MMK' },
+        { number: '650 / ပိုစတာ', name: '', photo: 'poesatar.jpg', amount: '10000MMK' },
+        { number: '630 / တရုတ်ဘင်ဂျို', name: '', photo: 'tayotepinkyo.jpg', amount: '10000MMK' },
+        { number: '648 / ကျားခုံ', name: '', photo: 'kyarkone.jpg', amount: '10000MMK' },
+        { number: '695 / ထွန်စက်', name: '', photo: 'htonsat.jpg', amount: '10000MMK' },
+        { number: '653 / လှေကား', name: '', photo: 'laykar.jpg', amount: '10000MMK' },
+        { number: '652 / ကောက်လိူင်းပုံ', name: '', photo: 'koutlinepone.jpg', amount: '10000MMK' },
+        { number: '665 / ပေသီး', name: '', photo: 'paytee.jpg', amount: '10000MMK' },
+        { number: '689 / လက်သုပ်ပဝါ', name: '', photo: 'lattokepawar.jpg', amount: '10000MMK' },
+        { number: '691 / လေး', name: '', photo: 'layy.jpg', amount: '10000MMK' },
+        { number: '658 / မြှား', name: '', photo: 'myar.jpg', amount: '10000MMK' },
+        { number: '657 / အမြောက်', name: '', photo: 'amyout.jpg', amount: '10000MMK' },
+        { number: '687 / မောင်းတီးတံ', name: '', photo: 'mountteetan.jpg', amount: '10000MMK' },
+        { number: '682 / ဆင်လိမ် ', name: '', photo: 'sinline.jpg', amount: '10000MMK' },
+        { number: '677 / ပုလွေ', name: '', photo: 'palway.jpg', amount: '10000MMK' },
+        { number: '669 / မောင်း', name: '', photo: 'moung.jpg', amount: '10000MMK' },
+        { number: '679 / လင်းကွင်း', name: '', photo: 'lingwin.jpg', amount: '10000MMK' },
+        { number: '696 / ခေါင်းလောင်း', name: '', photo: 'kaunglaung.jpg', amount: '10000MMK' },
+        { number: '654 / အိုးစည်', name: '', photo: 'osi.jpg', amount: '10000MMK' },
+        { number: '674 / တံဆိပ်တုံး', name: '', photo: 'tasitetone.jpg', amount: '10000MMK' },
+        { number: '688 / အလေး', name: '', photo: 'alay.jpg', amount: '10000MMK' },
+        { number: '678 / ဂီတာ', name: '', photo: 'ketar.jpg', amount: '10000MMK' },
+        { number: '662 / နှဲ', name: '', photo: 'nae.jpg', amount: '10000MMK' },
+        { number: '672 / ပေါက်ဆိန်', name: '', photo: 'paungsain.jpg', amount: '10000MMK' },
+        { number: '693 / ဆံညှပ်', name: '', photo: 'sannyat.jpg', amount: '10000MMK' },
+        { number: '670 / လက်ကောက်', name: '', photo: 'latkyat.jpg', amount: '10000MMK' },
+        { number: '684 / လက်စွပ်', name: '', photo: 'latsote.jpg', amount: '10000MMK' },
+        { number: '666 / ရွှေခေါင်းဘီး', name: '', photo: 'shwekaungbee.jpg', amount: '10000MMK' },
+        { number: '685 / ကြည့်မှန်', name: '', photo: 'kyiman.jpg', amount: '10000MMK' },
+        { number: '690 / ကပ်ကြေး', name: '', photo: 'katjyi.jpg', amount: '10000MMK' },
+        { number: '661 / ခေါင်းအုံး', name: '', photo: 'kaungown.jpg', amount: '10000MMK' },
+        { number: '668 / ဖျာလိပ်', name: '', photo: 'pyarlate.jpg', amount: '10000MMK' },
+        { number: '663 / ခြင်ထောင်', name: '', photo: 'chintaung.jpg', amount: '10000MMK' },
+        { number: '699 / ချိန်ခွင် ', name: '', photo: 'chainkwin.jpg', amount: '10000MMK' },
+        { number: '660 / ခရားအိုး', name: '', photo: 'kayaro.jpg', amount: '10000MMK' },
+        { number: '686 / ကနစိုသီး', name: '', photo: 'kanasoetee.jpg', amount: '10000MMK' },
+        { number: '673 / ရေစည်', name: '', photo: 'yaysi.jpg', amount: '10000MMK' },
+        { number: '675 / စဥ့်အိုး', name: '', photo: 'sino.jpg', amount: '10000MMK' },
+        { number: '683 / ဇလုံ', name: '', photo: 'zalone.jpg', amount: '10000MMK' },
+        { number: '659 / သုံးမြှောက်ထောက်', name: '', photo: 'tonemounttout.jpg', amount: '10000MMK' },
+        { number: '667 / လွှ', name: '', photo: 'saw.jpg', amount: '10000MMK' },
+        { number: '655 / မင်းကွတ်သီး', name: '', photo: 'minkouttee.jpg', amount: '10000MMK' },
+        { number: '676 / လှေ', name: '', photo: 'lays.jpg', amount: '10000MMK' },
+        { number: '656 / ဝက်ခြံ', name: '', photo: 'wattchan.jpg', amount: '10000MMK' },
+        { number: '697 / သော့ ', name: '', photo: 'key.jpg', amount: '10000MMK' },
+        { number: '671 / မီးဖို', name: '', photo: 'meevo.jpg', amount: '10000MMK' },
+        { number: '681 / မီးပူ', name: '', photo: 'meepu.jpg', amount: '10000MMK' },
+        { number: '651 / ရေနွေးအိုး', name: '', photo: 'yaynwayo.jpg', amount: '10000MMK' },
+        { number: '664 / တံမြတ်စည်း', name: '', photo: 'thamyatsee.jpg', amount: '10000MMK' },
+        { number: '692 / ပိုက်ကွန်', name: '', photo: 'pakekunn.jpg', amount: '10000MMK' },
+        { number: '700 / ကြိုးခွေ', name: '', photo: 'kyowkway.jpg', amount: '10000MMK' },
+        { number: '680 / ငါးမျှားတံ', name: '', photo: 'ngemyartan.jpg', amount: '10000MMK' },
+        { number: '698 / ပဒေါင်လူမျိုး', name: '', photo: 'padaunglumyo.jpg', amount: '10000MMK' },
+        { number: '745 / ဘီလူး', name: '', photo: 'beluu.jpg', amount: '10000MMK' },
+        { number: '703 / ဇာတ်ရုံ', name: '', photo: 'satyone.jpg', amount: '10000MMK' },
+        { number: '702 / နီု့ဆီဗူး', name: '', photo: 'noesepoo.jpg', amount: '10000MMK' },
+        { number: '715 / အမတ်ကြီး', name: '', photo: 'amatgyee.jpg', amount: '10000MMK' },
+        { number: '739 / ရုပ်မြင်သံကြား', name: '', photo: 'yotemyintangyar.jpg', amount: '10000MMK' },
+        { number: '741 / ထင်ရှားသူ', name: '', photo: 'thinkyarthu.jpg', amount: '10000MMK' },
+        { number: '708 / လီပိုပုလင်း', name: '', photo: 'lepopalin.jpg', amount: '10000MMK' },
+        { number: '707 / ဇော်ဂျီ', name: '', photo: 'zawgyi.jpg', amount: '10000MMK' },
+        { number: '737 / နှံကောင်', name: '', photo: 'nankaung.jpg', amount: '10000MMK' },
+        { number: '732 / သည်းခြေ', name: '', photo: 'thaechay.jpg', amount: '10000MMK' },
+        { number: '727 / ကိတ်မုန့်', name: '', photo: 'cakemoke.jpg', amount: '10000MMK' },
+        { number: '719 / မျှော့', name: '', photo: 'myoul.jpg', amount: '10000MMK' },
+        { number: '729 / ငှက်သိုက်', name: '', photo: 'ngetake.jpg', amount: '10000MMK' },
+        { number: '746 / လူရီုးခေါင်း', name: '', photo: 'luyoekaung.jpg', amount: '10000MMK' },
+        { number: '704 / ဆံပင်', name: '', photo: 'sanpin.jpg', amount: '10000MMK' },
+        { number: '624 / အလျားခုန်', name: '', photo: 'alarkone.jpg', amount: '10000MMK' },
+        { number: '738 / ရေပြွတ်', name: '', photo: 'yaypyout.jpg', amount: '10000MMK' },
+        { number: '728 / နာနတ်သီး', name: '', photo: 'narnattee.jpg', amount: '10000MMK' },
+        { number: '712 / အထုပ်ထမ်း', name: '', photo: '219.jpg', amount: '10000MMK' },
+        { number: '722 / ပျောက်အိုး', name: '', photo: '220.jpg', amount: '10000MMK' },
+        { number: '743 / အမတ်ဦးထုပ်', name: '', photo: '221.jpg', amount: '10000MMK' },
+        { number: '720 / ရှမ်းခေါက်ဆွဲ', name: '', photo: '222.jpg', amount: '10000MMK' },
+        { number: '734 / သံဘရပ်', name: '', photo: '223.jpg', amount: '10000MMK' },
+        { number: '716 / သွားတိုက်‌ဆေး', name: '', photo: '224.jpg', amount: '10000MMK' },
+        { number: '735 / စက္ကူလိပ်', name: '', photo: '225.jpg', amount: '10000MMK' },
+        { number: '740 / အင်္ကျီ', name: '', photo: '226.jpg', amount: '10000MMK' },
+        { number: '711 / တံမျက်စည်းလှည်း', name: '', photo: '227.jpg', amount: '10000MMK' },
+        { number: '718 / နှလုံး', name: '', photo: '228.jpg', amount: '10000MMK' },
+        { number: '713 / ကော်ပြား', name: '', photo: '229.jpg', amount: '10000MMK' },
+        { number: '749 / လှည်းဆွဲသူ', name: '', photo: '230.jpg', amount: '10000MMK' },
+        { number: '744 / ငှက်တိန်ညင်', name: '', photo: 'ngetainnyin.jpg', amount: '10000MMK' },
+        { number: '710 / ဖိုးမုတ်ဆိတ်ဖြူ', name: '', photo: 'phoemotesitephyu.jpg', amount: '10000MMK' },
+        { number: '736 / ဆုံ', name: '', photo: 'sone.jpg', amount: '10000MMK' },
+        { number: '723 / ဆိုင်ကယ်ဦးထုပ်', name: '', photo: 'sainkaloaktoke.jpg', amount: '10000MMK' },
+        { number: '725 / ယောဂီမယ်', name: '', photo: 'yawkemal.jpg', amount: '10000MMK' },
+        { number: '733 / နတ်သရဖူ', name: '', photo: '236.jpg', amount: '10000MMK' },
+        { number: '709 / ပုတ်ရဟန်း', name: '', photo: '237.jpg', amount: '10000MMK' },
+        { number: '717 / ခေါင်းဘီး', name: '', photo: '238.jpg', amount: '10000MMK' },
+        { number: '705 / စစ်သင်္ဘော', name: '', photo: '239.jpg', amount: '10000MMK' },
+        { number: '726 / အို‌ဗာတင်း', name: '', photo: '240.jpg', amount: '10000MMK' },
+        { number: '706 / အစာအိမ်', name: '', photo: '241.jpg', amount: '10000MMK' },
+        { number: '747 / ကော်ပရပ်', name: '', photo: '242.jpg', amount: '10000MMK' },
+        { number: '721 / ဝတ်စုံ', name: '', photo: '243.jpg', amount: '10000MMK' },
+        { number: '731 / မှတ်စုစာအုပ်', name: '', photo: '244.jpg', amount: '10000MMK' },
+        { number: '701 / ဦးထုပ်', name: '', photo: '245.jpg', amount: '10000MMK' },
+        { number: '714 / ယပ်ခပ်သူ', name: '', photo: '246.jpg', amount: '10000MMK' },
+        { number: '742 / စပါးစေ့', name: '', photo: '247.jpg', amount: '10000MMK' },
+        { number: '750 / သရက်ရွက်', name: '', photo: '248.jpg', amount: '10000MMK' },
+        { number: '730 / မျှစ်စားသူ', name: '', photo: '249.jpg', amount: '10000MMK' },
+        { number: '748 / လည် ရှည် ဖိနပ်', name: '', photo: '250.jpg', amount: '10000MMK' },
+        { number: '795 / အချိုရည်', name: '', photo: '251.jpg', amount: '10000MMK' },
+        { number: '753 / ညှပ်ဖိန်ပ်', name: '', photo: '252.jpg', amount: '10000MMK' },
+        { number: '752 / ဘတ်ထရီအိုး', name: '', photo: '253.jpg', amount: '10000MMK' },
+        { number: '765 / ဝက်အူလှည့်', name: '', photo: '254.jpg', amount: '10000MMK' },
+        { number: '789 / မိုင်းဗုံး', name: '', photo: '255.jpg', amount: '10000MMK' },
+        { number: '791 / ခါးပတ်', name: '', photo: '256.jpg', amount: '10000MMK' },
+        { number: '758 / စားပွဲ', name: '', photo: '257.jpg', amount: '10000MMK' },
+        { number: '757 / စစ်မှူးကြီး', name: '', photo: '258.jpg', amount: '10000MMK' },
+        { number: '787 / အုတ်ခဲ', name: '', photo: '259.jpg', amount: '10000MMK' },
+        { number: '782 / ငါး', name: '', photo: '260.jpg', amount: '10000MMK' },
+        { number: '777 / မြေပုံ', name: '', photo: '261.jpg', amount: '10000MMK' },
+        { number: '769 / ထီး', name: '', photo: '262.jpg', amount: '10000MMK' },
+        { number: '779 / သေနတ်', name: '', photo: '263.jpg', amount: '10000MMK' },
+        { number: '796 / ကင်းမြီးကောက်', name: '', photo: '264.jpg', amount: '10000MMK' },
+        { number: '754 / လွယ်အိတ်', name: '', photo: '265.jpg', amount: '10000MMK' },
+        { number: '774 / တံခါး', name: '', photo: '266.jpg', amount: '10000MMK' },
+        { number: '788 / ပန်းသီး', name: '', photo: '267.jpg', amount: '10000MMK' },
+        { number: '778 / အိမ်သာ', name: '', photo: '268.jpg', amount: '10000MMK' },
+        { number: '762 / နောက်ကျော', name: '', photo: '269.jpg', amount: '10000MMK' },
+        { number: '772 / လှံပစ်သူ', name: '', photo: '270.jpg', amount: '10000MMK' },
+        { number: '793 / မုန့်လေပွေ', name: '', photo: '271.jpg', amount: '10000MMK' },
+        { number: '770 / ကတ်ဆက်', name: '', photo: '272.jpg', amount: '10000MMK' },
+        { number: '784 / ပုရွက်စိတ်', name: '', photo: '273.jpg', amount: '10000MMK' },
+        { number: '767 / ကျောက်ကပ်', name: '', photo: '274.jpg', amount: '10000MMK' },
+        { number: '785 / ဘောင်းဘီ', name: '', photo: '275.jpg', amount: '10000MMK' },
+        { number: '780 / ဟင်းရွက်ပင်', name: '', photo: '276.jpg', amount: '10000MMK' },
+        { number: '761 / အလံကိုင်', name: '', photo: '277.jpg', amount: '10000MMK' },
+        { number: '768 / ရှူးဖိနပ်', name: '', photo: '278.jpg', amount: '10000MMK' },
+        { number: '763 / ဘောလုံးကန်', name: '', photo: '279.jpg', amount: '10000MMK' },
+        { number: '790 / ပန်း', name: '', photo: '280.jpg', amount: '10000MMK' },
+        { number: '794 / ဦးထုပ်', name: '', photo: '281.jpg', amount: '10000MMK' },
+        { number: '760 / ဒယ်အိုး', name: '', photo: '282.jpg', amount: '10000MMK' },
+        { number: '786 / ပိုးမွှား', name: '', photo: '283.jpg', amount: '10000MMK' },
+        { number: '773 / ခြေအိတ်', name: '', photo: '284.jpg', amount: '10000MMK' },
+        { number: '775 / သားစိမ်းသည်', name: '', photo: '285.jpg', amount: '10000MMK' },
+        { number: '783 / စစ်သူရဲ', name: '', photo: '286.jpg', amount: '10000MMK' },
+        { number: '759 / ဓာတ်ခဲ', name: '', photo: '287.jpg', amount: '10000MMK' },
+        { number: '766 / စာထည့်ပုံး', name: '', photo: '288.jpg', amount: '10000MMK' },
+        { number: '755 / အဆုတ်', name: '', photo: '289.jpg', amount: '10000MMK' },
+        { number: '776 / စာပို့သူ', name: '', photo: '290.jpg', amount: '10000MMK' },
+        { number: '756 / တိုင်ကပ်နာရီ', name: '', photo: '291.jpg', amount: '10000MMK' },
+        { number: '797 / ဆပ်ပြာ', name: '', photo: '292.jpg', amount: '10000MMK' },
+        { number: '771 / တဲ', name: '', photo: '293.jpg', amount: '10000MMK' },
+        { number: '781 / တွယ်အပ်', name: '', photo: '294.jpg', amount: '10000MMK' },
+        { number: '751 / ခရု', name: '', photo: '295.jpg', amount: '10000MMK' },
+        { number: '764 / ဂစ်တာတီး', name: '', photo: '296.jpg', amount: '10000MMK' },
+        { number: '792 / ဖလင်လိပ်', name: '', photo: '297.jpg', amount: '10000MMK' },
+        { number: '800 / ဆော်ဒါရည်', name: '', photo: '298.jpg', amount: '10000MMK' },
+        { number: '780 / မောင်းချဓား', name: '', photo: '299.jpg', amount: '10000MMK' },
+        { number: '798 / လေချွန်', name: '', photo: '300.jpg', amount: '10000MMK' },
+        { number: '845 / ခြေနာသူ', name: '', photo: '301.jpg', amount: '10000MMK' },
+        { number: '803 / သွပ်ကြိုး', name: '', photo: '302.jpg', amount: '10000MMK' },
+        { number: '802 / မန်ကျည်းသီး', name: '', photo: '303.jpg', amount: '10000MMK' },
+        { number: '815 / စန္ဒယား', name: '', photo: '304.jpg', amount: '10000MMK' },
+        { number: '839 / အစေခံ', name: '', photo: '305.jpg', amount: '10000MMK' },
+        { number: '841 / သရုပ်ဆောင်မင်းသမီး', name: '', photo: '306.jpg', amount: '10000MMK' },
+        { number: '808 / ရွှေတံဆိပ်', name: '', photo: '307.jpg', amount: '10000MMK' },
+        { number: '807 / ဂျုံကောက်ရီုး', name: '', photo: '308.jpg', amount: '10000MMK' },
+        { number: '837 / ယပ်တောင်', name: '', photo: '309.jpg', amount: '10000MMK' },
+        { number: '832 / ရွှေတုတ်', name: '', photo: '310.jpg', amount: '10000MMK' },
+        { number: '827 / တောင်ထိပ်', name: '', photo: '311.jpg', amount: '10000MMK' },
+        { number: '819 / မုန်စားသူ', name: '', photo: '312.jpg', amount: '10000MMK' },
+        { number: '829 / လျှို', name: '', photo: '313.jpg', amount: '10000MMK' },
+        { number: '846 / တိုင်', name: '', photo: '314.jpg', amount: '10000MMK' },
+        { number: '804 / အိမ်မြှောင်', name: '', photo: '315.jpg', amount: '10000MMK' },
+        { number: '834 / မီးဖို', name: '', photo: '316.jpg', amount: '10000MMK' },
+        { number: '838 / လက်နှိုပ်ဓာတ်မီး', name: '', photo: '317.jpg', amount: '10000MMK' },
+        { number: '828 / လှေကားထစ်', name: '', photo: '318.jpg', amount: '10000MMK' },
+        { number: '812 / အရက်ဆိုင်', name: '', photo: '319.jpg', amount: '10000MMK' },
+        { number: '822 / ဓားကိုင်သူ', name: '', photo: '320.jpg', amount: '10000MMK' },
+        { number: '843 / ရေကာတာ', name: '', photo: '321.jpg', amount: '10000MMK' },
+        { number: '820 / အဖိုးအို', name: '', photo: '322.jpg', amount: '10000MMK' },
+        { number: '823 / ရေတံခွန်', name: '', photo: '323.jpg', amount: '10000MMK' },
+        { number: '816 / ရေချိုးခန်း', name: '', photo: '324.jpg', amount: '10000MMK' },
+        { number: '835 / ပြတင်းပေါက်', name: '', photo: '325.jpg', amount: '10000MMK' },
+        { number: '840 / ရှောက်ချိုသီး', name: '', photo: '326.jpg', amount: '10000MMK' },
+        { number: '811 / ဧည့်ခန်း', name: '', photo: '327.jpg', amount: '10000MMK' },
+        { number: '818 / အပ်ချည့်လုံး', name: '', photo: '328.jpg', amount: '10000MMK' },
+        { number: '813 / အကြွေစေ့', name: '', photo: '329.jpg', amount: '10000MMK' },
+        { number: '849 / ဆန်အိတ်', name: '', photo: '330.jpg', amount: '10000MMK' },
+        { number: '844 / ပန်းရောင်းသူ', name: '', photo: '331.jpg', amount: '10000MMK' },
+        { number: '810 / ပျားအုံ', name: '', photo: '332.jpg', amount: '10000MMK' },
+        { number: '825 / ရဲဒင်းကိုင်', name: '', photo: '333.jpg', amount: '10000MMK' },
+        { number: '836 / ဘော', name: '', photo: '334.jpg', amount: '10000MMK' },
+        { number: '824 / ကားပလပ်', name: '', photo: '335.jpg', amount: '10000MMK' },
+        { number: '833 / ကုန်တင်ကား ', name: '', photo: '336.jpg', amount: '10000MMK' },
+        { number: '809 / မှန်ကြည့် ', name: '', photo: '337.jpg', amount: '10000MMK' },
+        { number: '817 / ယပ်ကိုင်သူ ', name: '', photo: '338.jpg', amount: '10000MMK' },
+        { number: '805 / ပဲပန်ကန် ', name: '', photo: '339.jpg', amount: '10000MMK' },
+        { number: '826 / သီချင်းစာအုပ်', name: '', photo: '340.jpg', amount: '10000MMK' },
+        { number: '806 / အဆိုတော်', name: '', photo: '341.jpg', amount: '10000MMK' },
+        { number: '847 / ဓားဝ္တဇ္ဇာ', name: '', photo: '342.jpg', amount: '10000MMK' },
+        { number: '821 / ရေနစ်သူ', name: '', photo: '343.jpg', amount: '10000MMK' },
+        { number: '831 / ရေတကောင်း', name: '', photo: '344.jpg', amount: '10000MMK' },
+        { number: '801 / ရဲသား', name: '', photo: '345.jpg', amount: '10000MMK' },
+        { number: '814 / မလိုင်မုန့်', name: '', photo: '346.jpg', amount: '10000MMK' },
+        { number: '842 / အပ်ချည်စက်', name: '', photo: '347.jpg', amount: '10000MMK' },
+        { number: '860 / ရေမွှေး', name: '', photo: '348.jpg', amount: '10000MMK' },
+        { number: '830 / ဘုရား', name: '', photo: '349.jpg', amount: '10000MMK' },
+        { number: '848 / စာဆိုတော်', name: '', photo: '350.jpg', amount: '10000MMK' },
+        { number: '895 / ဆုပေးနတ်မင်း', name: '', photo: '351.jpg', amount: '10000MMK' },
+        { number: '853 / စီးကရက် ', name: '', photo: '352.jpg', amount: '10000MMK' },
+        { number: '852 / နတ်နဂါး', name: '', photo: '353.jpg', amount: '10000MMK' },
+        { number: '865 / သက်တန့်', name: '', photo: '354.jpg', amount: '10000MMK' },
+        { number: '889 / စောင့်မျှော်သူ', name: '', photo: '355.jpg', amount: '10000MMK' },
+        { number: '891 / ကြောင်လျှာသီး', name: '', photo: '356.jpg', amount: '10000MMK' },
+        { number: '858 / ဘူးသီး', name: '', photo: '357.jpg', amount: '10000MMK' },
+        { number: '857 / နတ်ကွန်း', name: '', photo: '358.jpg', amount: '10000MMK' },
+        { number: '887 / ပဲစောင်းလျား', name: '', photo: '359.jpg', amount: '10000MMK' },
+        { number: '882 / ငရဲထိန်း', name: '', photo: '360.jpg', amount: '10000MMK' },
+        { number: '877 / မီတာပုံး', name: '', photo: '361.jpg', amount: '10000MMK' },
+        { number: '869 / မယ်တော်ရီ', name: '', photo: '362.jpg', amount: '10000MMK' },
+        { number: '879 / စီးကရက်ဗူး', name: '', photo: '363.jpg', amount: '10000MMK' },
+        { number: '896 / လဲလျှောင်းသူ', name: '', photo: '364.jpg', amount: '10000MMK' },
+        { number: '854 / ပန်း', name: '', photo: '365.jpg', amount: '10000MMK' },
+        { number: '874 / ငါးကန်', name: '', photo: '366.jpg', amount: '10000MMK' },
+        { number: '888 / အင်္ကျီ ', name: '', photo: '367.jpg', amount: '10000MMK' },
+        { number: '878 / ကန်စွန်းဥ', name: '', photo: '368.jpg', amount: '10000MMK' },
+        { number: '862 / ဆိုင်ကယ်', name: '', photo: '369.jpg', amount: '10000MMK' },
+        { number: '872 / တယော', name: '', photo: '370.jpg', amount: '10000MMK' },
+        { number: '893 / မြေရှင်ကြီး', name: '', photo: '371.jpg', amount: '10000MMK' },
+        { number: '870 / ပင်လယ်', name: '', photo: '372.jpg', amount: '10000MMK' },
+        { number: '884 / ကြက်မွှေးတံမြတ်စည်း', name: '', photo: '373.jpg', amount: '10000MMK' },
+        { number: '866 / ပိုက်ဆံအိတ်', name: '', photo: '374.jpg', amount: '10000MMK' },
+        { number: '885 / ဓားလွယ်သူ', name: '', photo: '375.jpg', amount: '10000MMK' },
+        { number: '890 / ဆပ်ပြာမူန့်', name: '', photo: '376.jpg', amount: '10000MMK' },
+        { number: '861 / နွားဆွဲသူ', name: '', photo: '377.jpg', amount: '10000MMK' },
+        { number: '868 / လက်ဖက်ပင်', name: '', photo: '378.jpg', amount: '10000MMK' },
+        { number: '863 / နတ်တောင်ဝှေး', name: '', photo: '379.jpg', amount: '10000MMK' },
+        { number: '899 / ဝမ်းဗိုက်', name: '', photo: '380.jpg', amount: '10000MMK' },
+        { number: '894 / ငန်းတော်ကြား', name: '', photo: '381.jpg', amount: '10000MMK' },
+        { number: '860 / သရဲ', name: '', photo: '382.jpg', amount: '10000MMK' },
+        { number: '886 / ပန်းပွင့်', name: '', photo: '383.jpg', amount: '10000MMK' },
+        { number: '873 / တီကောင်', name: '', photo: '384.jpg', amount: '10000MMK' },
+        { number: '875 / ယပ်တောင်', name: '', photo: '385.jpg', amount: '10000MMK' },
+        { number: '883 / စာထည့်ပုံး', name: '', photo: '386.jpg', amount: '10000MMK' },
+        { number: '859 / မိခင်နို့တိုက်', name: '', photo: '387.jpg', amount: '10000MMK' },
+        { number: '867 / ပုခုံး', name: '', photo: '388.jpg', amount: '10000MMK' },
+        { number: '855 / ထမင်းစား', name: '', photo: '389.jpg', amount: '10000MMK' },
+        { number: '876 / လမ်းလျောက်', name: '', photo: '390.jpg', amount: '10000MMK' },
+        { number: '856 / သံချွန်ကုတင်', name: '', photo: '391.jpg', amount: '10000MMK' },
+        { number: '897 / ပိတ်အုပ်', name: '', photo: '392.jpg', amount: '10000MMK' },
+        { number: '871 / ပိတ်အုပ်', name: '', photo: '392.jpg', amount: '10000MMK' },
+        { number: '881 / တရားဟော', name: '', photo: '394.jpg', amount: '10000MMK' },
+        { number: '851 / ပုဇွန်ခြောက်', name: '', photo: '395.jpg', amount: '10000MMK' },
+        { number: '864 / ဖရုံသီး', name: '', photo: '396.jpg', amount: '10000MMK' },
+        { number: '892 / ကားမောင်း', name: '', photo: '397.jpg', amount: '10000MMK' },
+        { number: '900 / သခွားသီး', name: '', photo: '398.jpg', amount: '10000MMK' },
+        { number: '880 / စုံတွဲအက', name: '', photo: '399.jpg', amount: '10000MMK' },
+        { number: '898 / တရုတ်အင်း', name: '', photo: '400.jpg', amount: '10000MMK' },
+        { number: '945 / ', name: '', photo: '401.jpg', amount: '10000MMK' },
+        { number: '903 / ', name: '', photo: '402.jpg', amount: '10000MMK' },
+        { number: '902 / ', name: '', photo: '403.jpg', amount: '10000MMK' },
+        { number: '915 / ', name: '', photo: '404.jpg', amount: '10000MMK' },
+        { number: '939 / ', name: '', photo: '405.jpg', amount: '10000MMK' },
+        { number: '941 / ', name: '', photo: '406.jpg', amount: '10000MMK' },
+        { number: '908 / ', name: '', photo: '407.jpg', amount: '10000MMK' },
+        { number: '907 / ', name: '', photo: '408.jpg', amount: '10000MMK' },
+        { number: '937 / ', name: '', photo: '409.jpg', amount: '10000MMK' },
+        { number: '932 / ', name: '', photo: '410.jpg', amount: '10000MMK' },
+        { number: '927 / ', name: '', photo: '411.jpg', amount: '10000MMK' },
+        { number: '919 / ', name: '', photo: '412.jpg', amount: '10000MMK' },
+        { number: '929 / ', name: '', photo: '413.jpg', amount: '10000MMK' },
+        { number: '946 / ', name: '', photo: '414.jpg', amount: '10000MMK' },
+        { number: '904 / ', name: '', photo: '415.jpg', amount: '10000MMK' },
+        { number: '924 / ', name: '', photo: '416.jpg', amount: '10000MMK' },
+        { number: '938 / ', name: '', photo: '417.jpg', amount: '10000MMK' },
+        { number: '928 / ', name: '', photo: '418.jpg', amount: '10000MMK' },
+        { number: '912 / ', name: '', photo: '419.jpg', amount: '10000MMK' },
+        { number: '922 / ', name: '', photo: '420.jpg', amount: '10000MMK' },
+        { number: '943 / ', name: '', photo: '421.jpg', amount: '10000MMK' },
+        { number: '920 / ', name: '', photo: '422.jpg', amount: '10000MMK' },
+        { number: '934 / ', name: '', photo: '423.jpg', amount: '10000MMK' },
+        { number: '916 / ', name: '', photo: '424.jpg', amount: '10000MMK' },
+        { number: '935 / ', name: '', photo: '425.jpg', amount: '10000MMK' },
+        { number: '940 / ', name: '', photo: '426.jpg', amount: '10000MMK' },
+        { number: '911 / ', name: '', photo: '427.jpg', amount: '10000MMK' },
+        { number: '918 / ', name: '', photo: '428.jpg', amount: '10000MMK' },
+        { number: '913 / ', name: '', photo: '429.jpg', amount: '10000MMK' },
+        { number: '949 / ', name: '', photo: '430.jpg', amount: '10000MMK' },
+        { number: '944 / ', name: '', photo: '431.jpg', amount: '10000MMK' },
+        { number: '910 / ', name: '', photo: '432.jpg', amount: '10000MMK' },
+        { number: '936 / ', name: '', photo: '433.jpg', amount: '10000MMK' },
+        { number: '923 / ', name: '', photo: '434.jpg', amount: '10000MMK' },
+        { number: '925 / ', name: '', photo: '435.jpg', amount: '10000MMK' },
+        { number: '933 / ', name: '', photo: '436.jpg', amount: '10000MMK' },
+        { number: '909 / ', name: '', photo: '437.jpg', amount: '10000MMK' },
+        { number: '917 / ', name: '', photo: '438.jpg', amount: '10000MMK' },
+        { number: '905 / ', name: '', photo: '439.jpg', amount: '10000MMK' },
+        { number: '926 / ', name: '', photo: '440.jpg', amount: '10000MMK' },
+        { number: '906 / ', name: '', photo: '441.jpg', amount: '10000MMK' },
+        { number: '947 / ', name: '', photo: '442.jpg', amount: '10000MMK' },
+        { number: '921 / ', name: '', photo: '443.jpg', amount: '10000MMK' },
+        { number: '931 / ', name: '', photo: '444.jpg', amount: '10000MMK' },
+        { number: '901 / ', name: '', photo: '445.jpg', amount: '10000MMK' },
+        { number: '914 / ', name: '', photo: '446.jpg', amount: '10000MMK' },
+        { number: '942 / ', name: '', photo: '447.jpg', amount: '10000MMK' },
+        { number: '950 / ', name: '', photo: '448.jpg', amount: '10000MMK' },
+        { number: '930 / ', name: '', photo: '449.jpg', amount: '10000MMK' },
+        { number: '948 / ', name: '', photo: '450.jpg', amount: '10000MMK' },
+        { number: '995 / ', name: '', photo: '451.jpg', amount: '10000MMK' },
+        { number: '953 / ', name: '', photo: '452.jpg', amount: '10000MMK' },
+        { number: '952 / ', name: '', photo: '453.jpg', amount: '10000MMK' },
+        { number: '965 / ', name: '', photo: '454.jpg', amount: '10000MMK' },
+        { number: '989 / ', name: '', photo: '455.jpg', amount: '10000MMK' },
+        { number: '991 / ', name: '', photo: '456.jpg', amount: '10000MMK' },
+        { number: '958 / ', name: '', photo: '457.jpg', amount: '10000MMK' },
+        { number: '957 / ', name: '', photo: '458.jpg', amount: '10000MMK' },
+        { number: '987 / ', name: '', photo: '459.jpg', amount: '10000MMK' },
+        { number: '982 / ', name: '', photo: '460.jpg', amount: '10000MMK' },
+        { number: '977 / ', name: '', photo: '461.jpg', amount: '10000MMK' },
+        { number: '969 / ', name: '', photo: '462.jpg', amount: '10000MMK' },
+        { number: '979 / ', name: '', photo: '463.jpg', amount: '10000MMK' },
+        { number: '996 / ', name: '', photo: '464.jpg', amount: '10000MMK' },
+        { number: '954 / ', name: '', photo: '465.jpg', amount: '10000MMK' },
+        { number: '974 / ', name: '', photo: '466.jpg', amount: '10000MMK' },
+        { number: '988 / ', name: '', photo: '467.jpg', amount: '10000MMK' },
+        { number: '978 / ', name: '', photo: '468.jpg', amount: '10000MMK' },
+        { number: '962 / ', name: '', photo: '469.jpg', amount: '10000MMK' },
+        { number: '972 / ', name: '', photo: '470.jpg', amount: '10000MMK' },
+        { number: '993 / ', name: '', photo: '471.jpg', amount: '10000MMK' },
+        { number: '970 / ', name: '', photo: '472.jpg', amount: '10000MMK' },
+        { number: '984 / ', name: '', photo: '473.jpg', amount: '10000MMK' },
+        { number: '966 / ', name: '', photo: '474.jpg', amount: '10000MMK' },
+        { number: '985 / ', name: '', photo: '475.jpg', amount: '10000MMK' },
+        { number: '990 / ', name: '', photo: '476.jpg', amount: '10000MMK' },
+        { number: '961 / ', name: '', photo: '477.jpg', amount: '10000MMK' },
+        { number: '968 / ', name: '', photo: '478.jpg', amount: '10000MMK' },
+        { number: '963 / ', name: '', photo: '479.jpg', amount: '10000MMK' },
+        { number: '999 / ', name: '', photo: '480.jpg', amount: '10000MMK' },
+        { number: '994 / ', name: '', photo: '481.jpg', amount: '10000MMK' },
+        { number: '960 / ', name: '', photo: '482.jpg', amount: '10000MMK' },
+        { number: '986 / ', name: '', photo: '483.jpg', amount: '10000MMK' },
+        { number: '973 / ', name: '', photo: '484.jpg', amount: '10000MMK' },
+        { number: '975 / ', name: '', photo: '485.jpg', amount: '10000MMK' },
+        { number: '983 / ', name: '', photo: '486.jpg', amount: '10000MMK' },
+        { number: '959 / ', name: '', photo: '487.jpg', amount: '10000MMK' },
+        { number: '967 / ', name: '', photo: '488.jpg', amount: '10000MMK' },
+        { number: '955 / ', name: '', photo: '489.jpg', amount: '10000MMK' },
+        { number: '976 / ', name: '', photo: '490.jpg', amount: '10000MMK' },
+        { number: '956 / ', name: '', photo: '491.jpg', amount: '10000MMK' },
+        { number: '997 / ', name: '', photo: '492.jpg', amount: '10000MMK' },
+        { number: '971 / ', name: '', photo: '493.jpg', amount: '10000MMK' },
+        { number: '981 / ', name: '', photo: '494.jpg', amount: '10000MMK' },
+        { number: '951 / ', name: '', photo: '495.jpg', amount: '10000MMK' },
+        { number: '964 / ', name: '', photo: '496.jpg', amount: '10000MMK' },
+        { number: '992 / ', name: '', photo: '497.jpg', amount: '10000MMK' },
+        { number: '000 / ', name: '', photo: '498.jpg', amount: '10000MMK' },
+        { number: '980 / ', name: '', photo: '499.jpg', amount: '10000MMK' },
+        { number: '998 / ', name: '', photo: '500.jpg', amount: '10000MMK' },
+        { number: '045 / ', name: '', photo: '501.jpg', amount: '10000MMK' },
+        { number: '003 / ', name: '', photo: '502.jpg', amount: '10000MMK' },
+        { number: '002 / ', name: '', photo: '503.jpg', amount: '10000MMK' },
+        { number: '015 / ', name: '', photo: '504.jpg', amount: '10000MMK' },
+        { number: '039 / ', name: '', photo: '505.jpg', amount: '10000MMK' },
+        { number: '041 / ', name: '', photo: '506.jpg', amount: '10000MMK' },
+        { number: '008 / ', name: '', photo: '507.jpg', amount: '10000MMK' },
+        { number: '007 / ', name: '', photo: '508.jpg', amount: '10000MMK' },
+        { number: '037 / ', name: '', photo: '509.jpg', amount: '10000MMK' },
+        { number: '032 / ', name: '', photo: '510.jpg', amount: '10000MMK' },
+        { number: '027 / ', name: '', photo: '511.jpg', amount: '10000MMK' },
+        { number: '019 / ', name: '', photo: '512.jpg', amount: '10000MMK' },
+        { number: '029 / ', name: '', photo: '513.jpg', amount: '10000MMK' },
+        // Add more entries as needed
+    ];
+
+    searchBar.addEventListener('input', () => {
+        const query = searchBar.value.toLowerCase();
+        results.innerHTML = '';
+
+        numbers.filter(item => item.number.includes(query))
+               .forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td><img src="${item.photo}" alt="${item.name}"></td><td>${item.number}</td><td>${item.amount}</td>`;
+                    tr.addEventListener('click', () => handleChoice(item));
+                    results.appendChild(tr);
+               });
+    });
+
+    function handleChoice(item) {
+        searchContainer.style.display = 'none';
+        detailsContainer.style.display = 'block';
+        selectedPhoto.src = item.photo;
+        selectedNumber.textContent = `Number: ${item.number}`;
+        selectedAmount.textContent = `Initial Amount: ${item.amount}`;
+        submitBtn.onclick = () => handleSubmit(item);
+    }
+
+    backBtn.addEventListener('click', () => {
+        detailsContainer.style.display = 'none';
+        searchContainer.style.display = 'block';
+    });
+
+    function handleSubmit(item) {
+        const amount = inputAmount.value;
+        const time = inputTime.value;
+        const day = inputDate.value;
+        const email = inputEmail.value;
+
+
+        if (amount && time && day) {
+            const userName = prompt("Enter your name:");
+            
+            if (userName) {
+                const emailParams = {
+                    from_name: userName,
+                    to_name: 'recipient@example.com', // Replace with recipient email
+                    message: `User ${userName} selected number ${item.number} with initial amount ${item.amount}, kpay name ${amount}  transfer number ${time} amount$ ${day} email ${email}.`
+                };
+
+                emailjs.send('default_service', 'template_099mw1b', emailParams) // Replace with your service ID and template ID
+                       .then(() => {
+                           alert('Email sent successfully!');
+                           saveHistory(item, userName, amount, time, day, email);
+                       })
+                       
+            }
+        }
+    }
+
+    function saveHistory(item, userName, amount, time, day, email) {
+        const historyItem = {
+            number: item.number,
+            name: item.name,
+            initialAmount: item.amount,
+            amount: amount,
+            time: time,
+            day: day,
+            email: email,
+            user: userName
+        };
+        let historyData = JSON.parse(localStorage.getItem('history')) || [];
+        historyData.push(historyItem);
+        localStorage.setItem('history', JSON.stringify(historyData));
+        renderHistory();
+    }
+
+    function renderHistory() {
+        history.innerHTML = '';
+        const historyData = JSON.parse(localStorage.getItem('history')) || [];
+        historyData.forEach(item => {
+            const div = document.createElement('div');
+            div.classList.add('history-item');
+            div.innerText = `Number: ${item.number}, Name: ${item.name}, Initial Amount: ${item.initialAmount}, Amount: ${item.amount}, Time: ${item.time}, Day: ${item.day}, Email: ${item.email} User: ${item.user}`;
+            history.appendChild(div);
+        });
+    }
+
+    renderHistory();
+});
+
+    </script>
+</body>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #77E4C8;
+}
+
+nav {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    text-align: center;
+}
+
+#searchBar {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+tbody tr:hover {
+    background-color: #f1f1f1;
+    cursor: pointer;
+}
+
+#results img {
+    width: 100px;
+    height: 100px;
+}
+
+#detailsContainer {
+    text-align: left;
+}
+
+#detailsContainer img {
+    width: 50%;
+    height: 50%;
+    justify-content: center;
+    display: grid;
+    align-items: center;
+}
+
+#history {
+    margin-top: 20px;
+}
+
+.history-item {
+    margin: 5px 0;
+    padding: 10px;
+    background: #e0e0e0;
+    border-radius: 5px;
+}
+#inputAmount{
+  margin-top: 20px;
+  height: 30x;
+  width: 100%;
+  font-size: 20px;
+}
+#inputTime{
+ margin-top: 25px;
+  height: 30x;
+  width: 100%;
+  font-size: 20px;
+}
+#inputDate{
+  margin-top: 25px;
+  height: 30x;
+  width: 100%;
+  font-size: 20px;
+
+}
+#inputEmail{
+  margin-top: 25px;
+  height: 30x;
+  width: 100%;
+  font-size: 20px;
+}
+#submitBtn{
+  margin-top: 25px;
+  height: 30x;
+  width: 100%;
+  color: whitesmoke;
+  font-size: 20px;
+  background-color: #4535C1;
+  border-radius: 20px;
+}
+</style>
+</html>
