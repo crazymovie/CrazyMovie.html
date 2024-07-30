@@ -624,7 +624,7 @@
                 const emailParams = {
                     from_name: userName,
                     to_name: 'recipient@example.com', // Replace with recipient email
-                    message: `User ${userName} selected number ${item.number} with initial amount ${item.amount}, kpay name ${amount}  transfer number ${time} amount$ ${day} email ${email}.`
+                    message: `User ${userName} selected number ${item.number} with initial amount ${item.amount}, kpay name ${amount}  transfer number ${time} amount$ ${day} email ${email},for 16/02/2024.`
                 };
 
                 emailjs.send('default_service', 'template_099mw1b', emailParams) // Replace with your service ID and template ID
@@ -646,26 +646,73 @@
             time: time,
             day: day,
             email: email,
-            user: userName
+            user: userName,
+            timestamp: new Date().toLocaleString()
+
         };
         let historyData = JSON.parse(localStorage.getItem('history')) || [];
         historyData.push(historyItem);
         localStorage.setItem('history', JSON.stringify(historyData));
         renderHistory();
     }
-
+     // Function to update the displayed number every 6 seconds
+     function updateNumber() {
+      var currentTime = new Date();
+      var currentHour = currentTime.getHours();
+      var currentMinute = currentTime.getMinutes();
+      var currentSecond = currentTime.getSeconds();
+      
+      // Check if the current time matches any of the stop times
+      for (var i = 0; i < stopTimes.length; i++) {
+        if (currentHour === stopTimes[i].hour && currentMinute === stopTimes[i].minute && currentSecond === 0) {
+          saveNumber(); // Automatically save the stopped number
+          return;
+        }
+      }
+  
+      // Generate a random number between 0 and 999
+      var randomNumber = Math.floor(Math.random() * 100);
+      // Format the number with leading zeros
+      var formattedNumber = randomNumber.toString().padStart(3, "0");
+      // Update the displayed number
+      numberDisplay.textContent = formattedNumber;
+    }
+ // Function to save the current number and time
+ function saveNumber() {
+      var currentTime = new Date();
+      var savedTime = currentTime.toLocaleTimeString();
+      var currentNumber = numberDisplay.textContent;
+      history.push({ number: currentNumber, time: savedTime });
+      if (history.length > 2) {
+        history.shift(); // Remove the oldest entry if there are more than 2
+      }
+      localStorage.setItem("history", JSON.stringify(history));
+      displayHistory(); // Display the updated history
+    }
+    
+    // Function to display the saved history
+    function displayHistory() {
+      historyList.innerHTML = ""; // Clear the previous history
+      for (var i = 0; i < history.length; i++) {
+        var entry = document.createElement("div");
+        entry.textContent = "Number: " + history[i].number + ", Time: " + history[i].time;
+        historyList.appendChild(entry);
+      }
+    }
+  
     function renderHistory() {
         history.innerHTML = '';
         const historyData = JSON.parse(localStorage.getItem('history')) || [];
         historyData.forEach(item => {
             const div = document.createElement('div');
             div.classList.add('history-item');
-            div.innerText = `Number: ${item.number}, Name: ${item.name}, Initial Amount: ${item.initialAmount}, Amount: ${item.amount}, Time: ${item.time}, Day: ${item.day}, Email: ${item.email} User: ${item.user},for 16/02/2024.`;
+            div.innerHTML = `<img src="${item.photo}" alt="${item.name}"><div><p>Number: ${item.number}</p><p>Name: ${item.name}</p><p>Kpay Name: $${item.amount}</p><p>Time: ${item.timestamp}</p><p> amount$ ${item.day}</p><p>for 16/02/2024.</p></div>`;
             history.appendChild(div);
         });
     }
 
     renderHistory();
+    
 });
 
     </script>
