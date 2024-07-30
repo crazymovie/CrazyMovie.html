@@ -11,7 +11,8 @@
 <body>
     <nav>
         <h1>Your History</h1> 
-        
+        <tr>
+        </tr>
     </nav>
     <div id="history" class="container">
        
@@ -27,11 +28,16 @@
     const history = document.getElementById('history');
 
 
-    function saveHistory(item) {
+    function saveHistory(item, userName, amount, time, day, email,timestamp) {
         const historyItem = {
             number: item.number,
             name: item.name,
-            amount: item.amount,
+            initialAmount: item.amount,
+            amount: amount,
+            time: time,
+            day: day,
+            email: email,
+            user: userName,
             photo: item.photo,
             timestamp: new Date().toLocaleString()
         };
@@ -47,7 +53,7 @@
         historyData.forEach(item => {
             const div = document.createElement('div');
             div.classList.add('history-item');
-            div.innerHTML = `<img src="${item.photo}" alt="${item.name}"><div><p>Number: ${item.number}</p><p>Name: ${item.name}</p><p>Amount: $${item.amount}</p><p>Time: ${item.timestamp}</p><p>for 16/02/2024.</p></div>`;
+            div.innerHTML = `<div><p>Number: ${item.number}</p><p>Kpay Name: ${item.amount}</p><p> amount : ${item.day}</p><p>Time: ${item.timestamp}</p><p>for 16/02/2024.</p></div>`;
             historyContainer.appendChild(div);
         });
     }
@@ -76,7 +82,7 @@
         numbers.filter(item => item.number.includes(query))
                .forEach(item => {
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td><img src="${item.photo}" alt="${item.name}"></td><td>${item.number}</td><td>${item.name}</td><td>${item.amount}</td>`;
+                    tr.innerHTML = `<td><img src="${item.photo}" alt="${item.name}"></td><td>${item.number}</td><td>${item.name}</td><td>${item.amount}</td><td>${item.day}</td>`;
                     tr.addEventListener('click', () => handleChoice(item));
                     results.appendChild(tr);
                });
@@ -101,6 +107,7 @@
             name: item.name,
             amount: item.amount,
             photo: item.photo,
+            day: item.day,
             timestamp: new Date().toLocaleString()
         };
         let historyData = JSON.parse(localStorage.getItem('history')) || [];
@@ -115,7 +122,7 @@
         historyData.forEach(item => {
             const div = document.createElement('div');
             div.classList.add('history-item');
-            div.innerHTML = `<img src="${item.photo}" alt="${item.name}"><div><p>Number: ${item.number}</p><p>Name: ${item.name}</p><p>Amount: $${item.amount}</p><p>Time: ${item.timestamp}</p><p>for 16/02/2024.</p></div>`;
+            div.innerHTML = `<img src="${item.photo}" alt="${item.name}"><div><p>Number: ${item.number}</p><p>Name: ${item.name}</p><p>Kpay Name: $${item.amount}</p><p>Time: ${item.timestamp}</p><p> amount$ ${item.day}</p><p>for 16/02/2024.</p></div>`;
             historyContainer.appendChild(div);
         });
     }
